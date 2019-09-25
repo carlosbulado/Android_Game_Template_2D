@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -43,9 +44,16 @@ public class GameEngine extends SurfaceView implements Runnable
 
     int playerXPosition;
     int playerYPosition;
+    Bitmap playerImage;
+    Bitmap ememyImage;
+
 
     int enemyXPosition;
     int enemyYPosition;
+
+
+    Rect playerHitbox;
+    Rect enemyHitbox;
 
     // ------------------------------------------------
     // ## GAME STATS
@@ -66,12 +74,30 @@ public class GameEngine extends SurfaceView implements Runnable
         // @TODO: Add your sprites
 
         // put initial starting postion of enemy
+        this.ememyImage = BitmapFactory.decodeResource(this.getContext().getResources(),
+                R.drawable.alien_ship2);
+
         this.enemyXPosition = 1300;
         this.enemyYPosition = 120;
+        // 1. create the hitbox
+        this.enemyHitbox = new Rect(1300,
+                120,
+                1300+ememyImage.getWidth(),
+                120+ememyImage.getHeight()
+        );
 
         // put the initial starting position of your player
+
+        this.playerImage = BitmapFactory.decodeResource(this.getContext().getResources(),
+                R.drawable.player_ship);
         this.playerXPosition = 100;
         this.playerYPosition = 600;
+
+        this.playerHitbox = new Rect(100,
+                600,
+                100+playerImage.getWidth(),
+                600+playerImage.getHeight()
+        );
 
         // @TODO: Any other game setup
 
@@ -167,13 +193,15 @@ public class GameEngine extends SurfaceView implements Runnable
             paintbrush.setStrokeWidth(5);
 
             //@TODO: Draw sprites
-            Bitmap playerImage = BitmapFactory.decodeResource(this.getContext().getResources(),
-                    R.drawable.player_ship);
+            // draw player graphic on screen
             canvas.drawBitmap(playerImage, playerXPosition, playerYPosition, paintbrush);
+            // draw the player's hitbox
+            canvas.drawRect(this.playerHitbox, paintbrush);
 
-            Bitmap ememyImage = BitmapFactory.decodeResource(this.getContext().getResources(),
-                    R.drawable.alien_ship2);
+            // draw the enemy graphic on the screen
             canvas.drawBitmap(ememyImage, enemyXPosition, enemyYPosition, paintbrush);
+            // 2. draw the enemy's hitbox
+            canvas.drawRect(this.enemyHitbox, paintbrush);
 
             //@TODO: Draw game stats
 
