@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity
     protected void onResume()
     {
         super.onResume();
-        gameTemplate.startGame();
+        gameTemplate.resumeGame();
     }
 
     // Stop the thread in gameEngine

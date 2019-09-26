@@ -9,155 +9,129 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GameEngine extends SurfaceView implements Runnable
 {
-    // Android debug variables
-    static String TAG = "GAME TEMPLATE";
+    private final String TAG = "VECTOR-MATH";
 
-    // screen size
-    int screenHeight;
-    int screenWidth;
-
-    // game state
-    boolean gameIsRunning;
-
-    // threading
-    Thread gameThread;
+    // game thread variables
+    private Thread gameThread = null;
+    private volatile boolean gameIsRunning;
 
     // drawing variables
-    SurfaceHolder holder;
-    Canvas canvas;
-    Paint paintbrush;
+    private Canvas canvas;
+    private Paint paintbrush;
+    private SurfaceHolder holder;
 
-    // ------------------------------------------------
-    // GAME SPECIFIC VARIABLES
-    // ------------------------------------------------
+    // Screen resolution varaibles
+    private int screenWidth;
+    private int screenHeight;
 
-    // ------------------------------------------------
-    // ## SPRITES
-    // ------------------------------------------------
+    private int whPlayer = 100;
+    private int whOthers = 70;
 
-    // ------------------------------------------------
-    // ## GAME STATS
-    // ------------------------------------------------
+    // Sprites
+    private Sprite player;
+    private List<Sprite> allThingsOnScreen;
 
-    public GameEngine(Context context, int w, int h)
-    {
+    public GameEngine(Context context, int screenW, int screenH) {
         super(context);
 
+        // intialize the drawing variables
         this.holder = this.getHolder();
         this.paintbrush = new Paint();
 
-        this.screenWidth = w;
-        this.screenHeight = h;
+        // set screen height and width
+        this.screenWidth = screenW;
+        this.screenHeight = screenH;
 
-        this.printScreenInfo();
+        this.player = new Sprite(this.getContext(), 1400, 200, this.whPlayer, this.whPlayer);
 
-        // @TODO: Add your sprites
-
-        // @TODO: Any other game setup
-
+        this.allThingsOnScreen = new ArrayList<>();
+        this.allThingsOnScreen.add(new Sprite(this.getContext(), 200, this.screenHeight - 200, this.whOthers, this.whOthers));
+        this.allThingsOnScreen.add(new Sprite(this.getContext(), 400, this.screenHeight - 200, this.whOthers, this.whOthers));
+        this.allThingsOnScreen.add(new Sprite(this.getContext(), 600, this.screenHeight - 200, this.whOthers, this.whOthers));
+        this.allThingsOnScreen.add(new Sprite(this.getContext(), 800, this.screenHeight - 200, this.whOthers, this.whOthers));
     }
 
-    private void printScreenInfo() { Log.d(TAG, "Screen (w, h) = " + this.screenWidth + "," + this.screenHeight); }
-
-    // ------------------------------------------------
-    // GAME STATE FUNCTIONS (run, stop, start)
-    // ------------------------------------------------
     @Override
-    public void run()
-    {
-        while (gameIsRunning == true)
-        {
-            this.updatePositions();
-            this.redrawSprites();
-            this.setFPS();
+    public void run() {
+        // @TODO: Put game loop in here
+        while (gameIsRunning == true) {
+            updateGame();
+            drawGame();
+            controlFPS();
         }
     }
 
-    public void pauseGame()
-    {
-        gameIsRunning = false;
-        try { gameThread.join(); }
-        catch (InterruptedException e) { }
+    // Game Loop methods
+    public void updateGame() {
     }
 
-    public void startGame()
-    {
+    public void drawGame() {
+        if (holder.getSurface().isValid()) {
+
+            // initialize the canvas
+            canvas = holder.lockCanvas();
+            // --------------------------------
+            // @TODO: put your drawing code in this section
+
+            // set the game's background color
+            canvas.drawColor(Color.argb(255,255,255,255));
+            paintbrush.setColor(Color.BLUE);
+
+            canvas.drawRect(this.player.getHitbox(), paintbrush);
+
+            paintbrush.setColor(Color.RED);
+            for (Sprite sp : this.allThingsOnScreen) canvas.drawRect(sp.getHitbox(),paintbrush);
+
+            // --------------------------------
+            holder.unlockCanvasAndPost(canvas);
+        }
+
+    }
+
+    public void controlFPS() {
+        try {
+            gameThread.sleep(17);
+        }
+        catch (InterruptedException e) {
+
+        }
+    }
+
+
+    // Deal with user input
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_UP:
+
+                break;
+            case MotionEvent.ACTION_DOWN:
+
+                break;
+        }
+        return true;
+    }
+
+    // Game status - pause & resume
+    public void pauseGame() {
+        gameIsRunning = false;
+        try {
+            gameThread.join();
+        }
+        catch (InterruptedException e) {
+
+        }
+    }
+    public void  resumeGame() {
         gameIsRunning = true;
         gameThread = new Thread(this);
         gameThread.start();
-    }
-
-    // ------------------------------------------------
-    // GAME ENGINE FUNCTIONS
-    // - update, draw, setFPS
-    // ------------------------------------------------
-
-    public void updatePositions()
-    {
-        // @TODO: Update position of all sprites
-
-        // @TODO: Logic of the game
-
-        //@TODO: Test lose conditions
-
-        //@TODO: Test win conditions
-
-    }
-
-    public void redrawSprites()
-    {
-        if (this.holder.getSurface().isValid())
-        {
-            // ------------------------------------------------
-            this.canvas = this.holder.lockCanvas();
-            // ------------------------------------------------
-
-            // configure the drawing tools
-            this.canvas.drawColor(Color.WHITE);
-            this.paintbrush.setColor(Color.BLACK);
-
-            //@TODO: Draw sprites
-            this.paintbrush.setColor(Color.GREEN);
-            this.canvas.drawRect(100, 600, 400, 900, this.paintbrush);
-
-            //@TODO: Draw game stats
-            this.paintbrush.setTextSize(80);
-            this.paintbrush.setColor(Color.BLUE);
-            this.canvas.drawText("This is just a game template", 50, 500, this.paintbrush);
-
-            // ------------------------------------------------
-            this.holder.unlockCanvasAndPost(canvas);
-            // ------------------------------------------------
-        }
-    }
-
-    public void setFPS()
-    {
-        //@TODO: How many times the screen will update
-        try { gameThread.sleep(50); }
-        catch (Exception e) { }
-    }
-
-    // ------------------------------------------------
-    // USER INPUT FUNCTIONS
-    // ------------------------------------------------
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event)
-    {
-        int userAction = event.getActionMasked();
-        //@TODO: What should happen when person touches the screen?
-        if (userAction == MotionEvent.ACTION_DOWN)
-        {
-
-        }
-        else if (userAction == MotionEvent.ACTION_UP)
-        {
-
-        }
-
-        return true;
     }
 }
