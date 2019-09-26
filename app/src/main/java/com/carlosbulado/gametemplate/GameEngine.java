@@ -1,12 +1,9 @@
 package com.carlosbulado.gametemplate;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -41,19 +38,8 @@ public class GameEngine extends SurfaceView implements Runnable
     // ------------------------------------------------
     // ## SPRITES
     // ------------------------------------------------
-
-    int playerXPosition;
-    int playerYPosition;
-    Bitmap playerImage;
-    Bitmap ememyImage;
-
-
-    int enemyXPosition;
-    int enemyYPosition;
-
-
-    Rect playerHitbox;
-    Rect enemyHitbox;
+    SpaceShip player;
+    SpaceShip enemy;
 
     // ------------------------------------------------
     // ## GAME STATS
@@ -74,46 +60,16 @@ public class GameEngine extends SurfaceView implements Runnable
         // @TODO: Add your sprites
 
         // put initial starting postion of enemy
-        this.ememyImage = BitmapFactory.decodeResource(this.getContext().getResources(),
-                R.drawable.alien_ship2);
-
-        this.enemyXPosition = 1300;
-        this.enemyYPosition = 120;
-        // 1. create the hitbox
-        this.enemyHitbox = new Rect(1300,
-                120,
-                1300+ememyImage.getWidth(),
-                120+ememyImage.getHeight()
-        );
+        this.enemy = new SpaceShip(1300, 120, R.drawable.alien_ship2, this.getContext());
 
         // put the initial starting position of your player
-
-        this.playerImage = BitmapFactory.decodeResource(this.getContext().getResources(),
-                R.drawable.player_ship);
-        this.playerXPosition = 100;
-        this.playerYPosition = 600;
-
-        this.playerHitbox = new Rect(100,
-                600,
-                100+playerImage.getWidth(),
-                600+playerImage.getHeight()
-        );
+        this.player = new SpaceShip(100, 600, R.drawable.player_ship, this.getContext());
 
         // @TODO: Any other game setup
 
     }
 
     private void printScreenInfo() { Log.d(TAG, "Screen (w, h) = " + this.screenWidth + "," + this.screenHeight); }
-
-    private void spawnPlayer() {
-        //@TODO: Start the player at the left side of screen
-    }
-    private void spawnEnemyShips() {
-        Random random = new Random();
-
-        //@TODO: Place the enemies in a random location
-
-    }
 
     // ------------------------------------------------
     // GAME STATE FUNCTIONS (run, stop, start)
@@ -151,27 +107,47 @@ public class GameEngine extends SurfaceView implements Runnable
     public void updatePositions()
     {
         // @TODO: Update position of all sprites
-        if (this.fingerAction == "mousedown") {
+        if (this.fingerAction == "mousedown")
+        {
             // if mousedown, then move player up
             // Make the UP movement > than down movement - this will
             // make it look like the player is moving up alot
-            this.playerYPosition = this.playerYPosition - 100;
+            this.player.moveSpaceShipOnYAxis(-100);
+
+            if(this.player.getY() < 0) this.player.setY(0);
         }
 
-        if (this.fingerAction == "mouseup") {
+        Log.d("this.screenHeight", "" + this.screenHeight);
+        Log.d("player.geBottom()", "" + this.player.getSpaceShipBottom());
+
+        if (this.fingerAction == "mouseup")
+        {
             // if mouseup, then move player down
-            this.playerYPosition = this.playerYPosition + 10;
+            this.player.moveSpaceShipOnYAxis(100);
+
+            if(this.player.getSpaceShipBottom() > this.screenHeight)
+            {
+                this.player.setBottom(this.screenHeight);
+            }
         }
         // @TODO: Logic of the game
-        this.enemyXPosition = this.enemyXPosition - 25;
+        this.enemy.moveSpaceShipOnXAxis(-25);
 
-        if (this.enemyXPosition <= 0) {
+        if (this.enemy.getX() <= 0)
+        {
             // restart the enemy in the starting position
-            this.enemyXPosition = 1300;
-            this.enemyYPosition = 120;
+            Random r = new Random();
+            int i1 = r.nextInt(2) + 1;
+            if(i1 == 1) this.enemy = new SpaceShip(1300, 120, R.drawable.alien_ship1, this.getContext());
+            else if(i1 == 2) this.enemy = new SpaceShip(1300, 120, R.drawable.alien_ship2, this.getContext());
+            else this.enemy = new SpaceShip(1300, 120, R.drawable.alien_ship3, this.getContext());
         }
 
         //@TODO: Test lose conditions
+        if(this.player.hits(this.enemy))
+        {
+            this.pauseGame();
+        }
 
         //@TODO: Test win conditions
     }
@@ -194,14 +170,10 @@ public class GameEngine extends SurfaceView implements Runnable
 
             //@TODO: Draw sprites
             // draw player graphic on screen
-            canvas.drawBitmap(playerImage, playerXPosition, playerYPosition, paintbrush);
-            // draw the player's hitbox
-            canvas.drawRect(this.playerHitbox, paintbrush);
+            this.player.drawSpaceShip(this.canvas, this.paintbrush);
 
             // draw the enemy graphic on the screen
-            canvas.drawBitmap(ememyImage, enemyXPosition, enemyYPosition, paintbrush);
-            // 2. draw the enemy's hitbox
-            canvas.drawRect(this.enemyHitbox, paintbrush);
+            this.enemy.drawSpaceShip(this.canvas, this.paintbrush);
 
             //@TODO: Draw game stats
 
