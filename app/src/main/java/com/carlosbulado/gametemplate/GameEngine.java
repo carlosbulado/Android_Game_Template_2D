@@ -50,10 +50,12 @@ public class GameEngine extends SurfaceView implements Runnable
         this.player = new Sprite(this.getContext(), 1400, 200, this.whPlayer, this.whPlayer);
 
         this.allThingsOnScreen = new ArrayList<>();
-        this.allThingsOnScreen.add(new Sprite(this.getContext(), 200, this.screenHeight - 200, this.whOthers, this.whOthers));
-        this.allThingsOnScreen.add(new Sprite(this.getContext(), 400, this.screenHeight - 200, this.whOthers, this.whOthers));
+        this.allThingsOnScreen.add(new Sprite(this.getContext(), 150, this.screenHeight - 200, this.whOthers, this.whOthers));
+        this.allThingsOnScreen.add(new Sprite(this.getContext(), 300, this.screenHeight - 200, this.whOthers, this.whOthers));
+        this.allThingsOnScreen.add(new Sprite(this.getContext(), 450, this.screenHeight - 200, this.whOthers, this.whOthers));
         this.allThingsOnScreen.add(new Sprite(this.getContext(), 600, this.screenHeight - 200, this.whOthers, this.whOthers));
-        this.allThingsOnScreen.add(new Sprite(this.getContext(), 800, this.screenHeight - 200, this.whOthers, this.whOthers));
+        this.allThingsOnScreen.add(new Sprite(this.getContext(), 750, this.screenHeight - 200, this.whOthers, this.whOthers));
+        this.allThingsOnScreen.add(new Sprite(this.getContext(), 900, this.screenHeight - 200, this.whOthers, this.whOthers));
     }
 
     @Override
@@ -67,7 +69,24 @@ public class GameEngine extends SurfaceView implements Runnable
     }
 
     // Game Loop methods
-    public void updateGame() {
+    public void updateGame()
+    {
+        for (int i = 0 ; i < this.allThingsOnScreen.size() ; i++)
+        {
+//            if(!this.allThingsOnScreen.get(i).isIsmoving())
+//            {
+//                this.allThingsOnScreen.get(i).setIsmoving(true);
+//                break;
+//            }
+            if(i == 0) this.allThingsOnScreen.get(i).setIsmoving(true);
+            else if(this.allThingsOnScreen.get(i - 1).getHitbox().bottom < this.allThingsOnScreen.get(i).getHitbox().top) this.allThingsOnScreen.get(i).setIsmoving(true);
+        }
+
+        for (Sprite sp : this.allThingsOnScreen)
+        {
+            sp.updatePosition(0, -10);
+            if(sp.y <= 0) sp.respawn();
+        }
     }
 
     public void drawGame() {
@@ -95,7 +114,7 @@ public class GameEngine extends SurfaceView implements Runnable
 
     public void controlFPS() {
         try {
-            gameThread.sleep(17);
+            gameThread.sleep(50);
         }
         catch (InterruptedException e) {
 
