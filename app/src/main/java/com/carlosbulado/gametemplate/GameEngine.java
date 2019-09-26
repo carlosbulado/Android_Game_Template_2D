@@ -9,6 +9,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class GameEngine extends SurfaceView implements Runnable
@@ -31,6 +33,9 @@ public class GameEngine extends SurfaceView implements Runnable
     Canvas canvas;
     Paint paintbrush;
 
+    // Random
+    Random random = new Random();
+
     // ------------------------------------------------
     // GAME SPECIFIC VARIABLES
     // ------------------------------------------------
@@ -39,7 +44,7 @@ public class GameEngine extends SurfaceView implements Runnable
     // ## SPRITES
     // ------------------------------------------------
     SpaceShip player;
-    SpaceShip enemy;
+    List<SpaceShip> enemies;
 
     // ------------------------------------------------
     // ## GAME STATS
@@ -60,7 +65,8 @@ public class GameEngine extends SurfaceView implements Runnable
         // @TODO: Add your sprites
 
         // put initial starting postion of enemy
-        this.enemy = new SpaceShip(1300, 120, R.drawable.alien_ship2, this.getContext());
+        this.enemies = new ArrayList<>();
+        this.initEnemies();
 
         // put the initial starting position of your player
         this.player = new SpaceShip(100, 600, R.drawable.player_ship, this.getContext());
@@ -70,6 +76,12 @@ public class GameEngine extends SurfaceView implements Runnable
     }
 
     private void printScreenInfo() { Log.d(TAG, "Screen (w, h) = " + this.screenWidth + "," + this.screenHeight); }
+
+    private void initEnemies()
+    {
+        this.enemies.add(new SpaceShip(this.screenWidth - 100, this.random.nextInt(this.screenHeight) + 1, R.drawable.alien_ship2, this.getContext()));
+        this.enemies.add(new SpaceShip(this.screenWidth - 100, this.random.nextInt(this.screenHeight) + 1, R.drawable.alien_ship2, this.getContext()));
+    }
 
     // ------------------------------------------------
     // GAME STATE FUNCTIONS (run, stop, start)
@@ -117,13 +129,10 @@ public class GameEngine extends SurfaceView implements Runnable
             if(this.player.getY() < 0) this.player.setY(0);
         }
 
-        Log.d("this.screenHeight", "" + this.screenHeight);
-        Log.d("player.geBottom()", "" + this.player.getSpaceShipBottom());
-
         if (this.fingerAction == "mouseup")
         {
             // if mouseup, then move player down
-            this.player.moveSpaceShipOnYAxis(100);
+            this.player.moveSpaceShipOnYAxis(10);
 
             if(this.player.getSpaceShipBottom() > this.screenHeight)
             {
@@ -131,22 +140,33 @@ public class GameEngine extends SurfaceView implements Runnable
             }
         }
         // @TODO: Logic of the game
-        this.enemy.moveSpaceShipOnXAxis(-25);
-
-        if (this.enemy.getX() <= 0)
+        List<SpaceShip> newEnemies = new ArrayList<>();
+        List<SpaceShip> removeEnemies = new ArrayList<>();
+        for (SpaceShip ship : this.enemies)
         {
-            // restart the enemy in the starting position
-            Random r = new Random();
-            int i1 = r.nextInt(2) + 1;
-            if(i1 == 1) this.enemy = new SpaceShip(1300, 120, R.drawable.alien_ship1, this.getContext());
-            else if(i1 == 2) this.enemy = new SpaceShip(1300, 120, R.drawable.alien_ship2, this.getContext());
-            else this.enemy = new SpaceShip(1300, 120, R.drawable.alien_ship3, this.getContext());
+            ship.moveSpaceShipOnXAxis(-25);
+
+            if (ship.getX() <= 0)
+            {
+                removeEnemies.add(ship);
+                // restart the enemy in the starting position
+                int i1 = this.random.nextInt(2) + 1;
+                if(i1 == 1) newEnemies.add(new SpaceShip(this.screenWidth - 100, this.random.nextInt(this.screenHeight) + 1, R.drawable.alien_ship1, this.getContext()));
+                else if(i1 == 2) newEnemies.add(new SpaceShip(this.screenWidth - 100, this.random.nextInt(this.screenHeight) + 1, R.drawable.alien_ship2, this.getContext()));
+                else newEnemies.add(new SpaceShip(this.screenWidth - 100, this.random.nextInt(this.screenHeight) + 1, R.drawable.alien_ship3, this.getContext()));
+            }
         }
 
+        this.enemies.removeAll(removeEnemies);
+        this.enemies.addAll(newEnemies);
+
         //@TODO: Test lose conditions
-        if(this.player.hits(this.enemy))
+        for (SpaceShip ship : this.enemies)
         {
-            this.pauseGame();
+            if(this.player.hits(ship))
+            {
+                this.pauseGame();
+            }
         }
 
         //@TODO: Test win conditions
@@ -173,7 +193,7 @@ public class GameEngine extends SurfaceView implements Runnable
             this.player.drawSpaceShip(this.canvas, this.paintbrush);
 
             // draw the enemy graphic on the screen
-            this.enemy.drawSpaceShip(this.canvas, this.paintbrush);
+            for (SpaceShip ship : this.enemies) ship.drawSpaceShip(this.canvas, this.paintbrush);
 
             //@TODO: Draw game stats
 
@@ -204,6 +224,11 @@ public class GameEngine extends SurfaceView implements Runnable
         if (userAction == MotionEvent.ACTION_DOWN)
         {
             fingerAction = "mousedown";
+
+            if(!this.gameIsRunning)
+            {
+                this.startGame();
+            }
         }
         else if (userAction == MotionEvent.ACTION_UP)
         {
