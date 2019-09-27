@@ -56,6 +56,8 @@ public class GameEngine extends SurfaceView implements Runnable
         this.allThingsOnScreen.add(new Sprite(this.getContext(), 600, this.screenHeight - 200, this.whOthers, this.whOthers));
         this.allThingsOnScreen.add(new Sprite(this.getContext(), 750, this.screenHeight - 200, this.whOthers, this.whOthers));
         this.allThingsOnScreen.add(new Sprite(this.getContext(), 900, this.screenHeight - 200, this.whOthers, this.whOthers));
+        this.allThingsOnScreen.add(new Sprite(this.getContext(), 1050, this.screenHeight - 200, this.whOthers, this.whOthers));
+        this.allThingsOnScreen.add(new Sprite(this.getContext(), 1200, this.screenHeight - 200, this.whOthers, this.whOthers));
     }
 
     @Override
@@ -73,19 +75,37 @@ public class GameEngine extends SurfaceView implements Runnable
     {
         for (int i = 0 ; i < this.allThingsOnScreen.size() ; i++)
         {
-//            if(!this.allThingsOnScreen.get(i).isIsmoving())
-//            {
-//                this.allThingsOnScreen.get(i).setIsmoving(true);
-//                break;
-//            }
             if(i == 0) this.allThingsOnScreen.get(i).setIsmoving(true);
             else if(this.allThingsOnScreen.get(i - 1).getHitbox().bottom < this.allThingsOnScreen.get(i).getHitbox().top) this.allThingsOnScreen.get(i).setIsmoving(true);
         }
 
         for (Sprite sp : this.allThingsOnScreen)
         {
-            sp.updatePosition(0, -10);
-            if(sp.y <= 0) sp.respawn();
+            double a = (this.player.getX() - sp.getX());
+            double b = (this.player.getY() - sp.getY());
+            double distance = Math.sqrt((a*a) + (b*b));
+
+            // 2. calculate the "rate" to move
+            double xn = (a / distance);
+            double yn = (b / distance);
+
+            // 3. move the bullet
+            sp.setX(sp.getX() + (int)(xn * 40));
+            sp.setY(sp.getY() + (int)(yn * 40));
+
+            sp.updateHitbox();
+            //sp.updatePosition(0, -10);
+            if(this.player.getHitbox().intersect(sp.getHitbox()))
+            {
+//                try {
+//                    gameThread.sleep(1000);
+//                }
+//                catch (InterruptedException e) {
+//
+//                }
+                sp.respawn();
+                this.player.respawn();
+            }
         }
     }
 
@@ -132,7 +152,7 @@ public class GameEngine extends SurfaceView implements Runnable
 
                 break;
             case MotionEvent.ACTION_DOWN:
-
+                this.allThingsOnScreen.add(new Sprite(this.getContext(), (int)event.getX(), (int)event.getY(), this.whOthers, this.whOthers));
                 break;
         }
         return true;

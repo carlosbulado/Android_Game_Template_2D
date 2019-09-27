@@ -8,8 +8,8 @@ public class Sprite
     private Context context;
     private int initX;
     private int initY;
-    protected int x;
-    protected int y;
+    private int x;
+    private int y;
     private int width;
     private int height;
     private Rect hitbox;
@@ -58,5 +58,25 @@ public class Sprite
         this.x = this.initX;
         this.y = this.initY;
         updateHitbox();
+    }
+
+    public int getX()
+    {
+        return x;
+    }
+
+    public void setX(int x)
+    {
+        this.x = x;
+    }
+
+    public int getY()
+    {
+        return y;
+    }
+
+    public void setY(int y)
+    {
+        this.y = y;
     }
 }
