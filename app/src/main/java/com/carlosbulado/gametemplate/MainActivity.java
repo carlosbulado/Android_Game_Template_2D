@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity
         // Pass it the screen size (height & width)
         // 256 is the height escape for landscape
         // 283 is the height escape for portrait
-        gameTemplate = new GameEngine(this, size.x - 200, size.y - 256);
+        gameTemplate = new GameEngine(this, size.x - 200, size.y - 100);
 
         // Make GameEngine the view of the Activity
         setContentView(gameTemplate);

@@ -4,10 +4,15 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class GameEngine extends SurfaceView implements Runnable
 {
@@ -29,6 +34,10 @@ public class GameEngine extends SurfaceView implements Runnable
     Canvas canvas;
     Paint paintbrush;
 
+    Random r = new Random();
+    int fpsEnemyCount = 0;
+    int fpsLifeCount = 0;
+
     // ------------------------------------------------
     // GAME SPECIFIC VARIABLES
     // ------------------------------------------------
@@ -39,6 +48,7 @@ public class GameEngine extends SurfaceView implements Runnable
     // ## SPRITES
     // ------------------------------------------------
     Sprite player;
+    List<Sprite> enemies;
 
     // ------------------------------------------------
     // ## GAME STATS
@@ -57,7 +67,8 @@ public class GameEngine extends SurfaceView implements Runnable
         this.printScreenInfo();
 
         // @TODO: Add your sprites
-        this.player = new Sprite(context, this.screenWidth - 50, this.screenHeight / 2, R.drawable.dino64);
+        this.player = new Sprite(context, this.screenWidth - 50, this.screenHeight - 850, R.drawable.dino64);
+        this.enemies = new ArrayList<>();
 
         // @TODO: Any other game setup
         this.hp = 5;
@@ -72,11 +83,14 @@ public class GameEngine extends SurfaceView implements Runnable
     @Override
     public void run()
     {
-        while (gameIsRunning == true)
+        while (true)
         {
-            this.updatePositions();
-            this.redrawSprites();
-            this.setFPS();
+            if(gameIsRunning)
+            {
+                this.updatePositions();
+                this.redrawSprites();
+                this.setFPS();
+            }
         }
     }
 
@@ -101,10 +115,18 @@ public class GameEngine extends SurfaceView implements Runnable
 
     public void updatePositions()
     {
+        this.fpsEnemyCount += 1;
+        this.fpsLifeCount += 1;
         // @TODO: Update position of all sprites
 
         // @TODO: Logic of the game
+        int isSpawnObject = this.r.nextInt(12) + 1;
+        if(this.fpsEnemyCount == 40)
+        {
+            this.fpsEnemyCount = 0;
+            Sprite enemy = new Sprite(this.getContext(), 100, 100, R.drawable.poop32);
 
+        }
         //@TODO: Test lose conditions
 
         //@TODO: Test win conditions
@@ -125,6 +147,17 @@ public class GameEngine extends SurfaceView implements Runnable
 
             //@TODO: Draw sprites
             this.canvas.drawBitmap(this.player.getSpriteImage(), this.player.getX(), this.player.getY(), paintbrush);
+
+            Rect lane1 = new Rect(100, this.screenHeight - 920, this.screenWidth - 70, this.screenHeight - 910);
+            Rect lane2 = new Rect(100, this.screenHeight - 620, this.screenWidth - 70, this.screenHeight - 610);
+            Rect lane3 = new Rect(100, this.screenHeight - 320, this.screenWidth - 70, this.screenHeight - 310);
+            Rect lane4 = new Rect(100, this.screenHeight - 20, this.screenWidth - 70, this.screenHeight - 10);
+
+            this.paintbrush.setColor(Color.GRAY);
+            this.canvas.drawRect(lane1, paintbrush);
+            this.canvas.drawRect(lane2, paintbrush);
+            this.canvas.drawRect(lane3, paintbrush);
+            this.canvas.drawRect(lane4, paintbrush);
 
             //@TODO: Draw game stats
             this.paintbrush.setTextSize(80);
@@ -154,6 +187,9 @@ public class GameEngine extends SurfaceView implements Runnable
     {
         int userAction = event.getActionMasked();
         //@TODO: What should happen when person touches the screen?
+        /*
+        Y positions for dino = 250 / 550 / 850 / 1150 OR  + - 300
+         */
         if (userAction == MotionEvent.ACTION_DOWN)
         {
 
