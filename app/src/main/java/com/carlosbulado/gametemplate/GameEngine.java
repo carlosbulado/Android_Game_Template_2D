@@ -44,6 +44,7 @@ public class GameEngine extends SurfaceView implements Runnable
     // ------------------------------------------------
     int hp;
     int score;
+    int highScore = 0;
     boolean enemyUp = true;
     int yPosEnemy = 250;
     int newPlayerY;
@@ -106,8 +107,7 @@ public class GameEngine extends SurfaceView implements Runnable
     public void pauseGame()
     {
         gameIsRunning = false;
-        try { gameThread.join(); }
-        catch (InterruptedException e) { }
+        if(this.highScore < this.score) this.highScore = this.score;
     }
 
     public void startGame()
@@ -115,6 +115,13 @@ public class GameEngine extends SurfaceView implements Runnable
         gameIsRunning = true;
         gameThread = new Thread(this);
         gameThread.start();
+    }
+
+    public void restartGame()
+    {
+        this.score = 0;
+        this.hp = 5;
+        gameIsRunning = true;
     }
 
     // ------------------------------------------------
@@ -194,30 +201,44 @@ public class GameEngine extends SurfaceView implements Runnable
             this.paintbrush.setColor(Color.BLACK);
 
             //@TODO: Draw sprites
-            this.canvas.drawBitmap(this.player.getSpriteImage(), this.player.getX(), this.player.getY(), paintbrush);
+            if(gameIsRunning)
+            {
+                this.canvas.drawBitmap(this.player.getSpriteImage(), this.player.getX(), this.player.getY(), paintbrush);
 
-            Rect lane1 = new Rect(100, this.screenHeight - 920, this.screenWidth - 70, this.screenHeight - 910);
-            Rect lane2 = new Rect(100, this.screenHeight - 620, this.screenWidth - 70, this.screenHeight - 610);
-            Rect lane3 = new Rect(100, this.screenHeight - 320, this.screenWidth - 70, this.screenHeight - 310);
-            Rect lane4 = new Rect(100, this.screenHeight - 20, this.screenWidth - 70, this.screenHeight - 10);
+                Rect lane1 = new Rect(100, this.screenHeight - 920, this.screenWidth - 70, this.screenHeight - 910);
+                Rect lane2 = new Rect(100, this.screenHeight - 620, this.screenWidth - 70, this.screenHeight - 610);
+                Rect lane3 = new Rect(100, this.screenHeight - 320, this.screenWidth - 70, this.screenHeight - 310);
+                Rect lane4 = new Rect(100, this.screenHeight - 20, this.screenWidth - 70, this.screenHeight - 10);
 
-            this.paintbrush.setColor(Color.GRAY);
-            this.canvas.drawRect(lane1, paintbrush);
-            this.canvas.drawRect(lane2, paintbrush);
-            this.canvas.drawRect(lane3, paintbrush);
-            this.canvas.drawRect(lane4, paintbrush);
+                this.paintbrush.setColor(Color.GRAY);
+                this.canvas.drawRect(lane1, paintbrush);
+                this.canvas.drawRect(lane2, paintbrush);
+                this.canvas.drawRect(lane3, paintbrush);
+                this.canvas.drawRect(lane4, paintbrush);
 
-            for (Item enemy : this.enemies) this.canvas.drawBitmap(enemy.getSpriteImage(), enemy.getX(), enemy.getY(), paintbrush);
+                for (Item enemy : this.enemies) this.canvas.drawBitmap(enemy.getSpriteImage(), enemy.getX(), enemy.getY(), paintbrush);
 
-            //@TODO: Draw game stats
-            this.paintbrush.setTextSize(80);
-            this.paintbrush.setColor(Color.BLUE);
-            this.canvas.drawText("LIVES: " + this.hp, this.screenWidth / 2, 100, this.paintbrush);
-            this.canvas.drawText("SCORE: " + this.score, this.screenWidth - 400, 100, this.paintbrush);
+                //@TODO: Draw game stats
+                this.paintbrush.setTextSize(80);
+                this.paintbrush.setColor(Color.BLUE);
+                this.canvas.drawText("LIVES: " + this.hp, this.screenWidth / 2, 100, this.paintbrush);
+                this.canvas.drawText("SCORE: " + this.score + " ( " + this.highScore + " )", this.screenWidth - 500, 100, this.paintbrush);
 
-            // --------------- DEBUG ---------------
-            // If you want to know if the enemies are being removed, uncomment this line below
-            //this.canvas.drawText("ENEMIES: " + this.enemies.size(), 100, 100, this.paintbrush);
+                // --------------- DEBUG ---------------
+                // If you want to know if the enemies are being removed, uncomment this line below
+                //this.canvas.drawText("ENEMIES: " + this.enemies.size(), 100, 100, this.paintbrush);
+
+            }
+            else
+            {
+                this.paintbrush.setTextSize(150);
+                this.paintbrush.setColor(Color.BLACK);
+                this.canvas.drawText("-->      YOU LOST!     <--", 300, 300, this.paintbrush);
+                this.canvas.drawText("--> TAP TO RESTART <--", 300, 600, this.paintbrush);
+                this.paintbrush.setColor(Color.BLUE);
+                this.canvas.drawText("Score: " + this.score, 300, 800, this.paintbrush);
+                this.canvas.drawText("Highest Score: " + this.highScore, 300, 1000, this.paintbrush);
+            }
 
             // ------------------------------------------------
             this.holder.unlockCanvasAndPost(canvas);
@@ -246,13 +267,16 @@ public class GameEngine extends SurfaceView implements Runnable
          */
         if (userAction == MotionEvent.ACTION_DOWN)
         {
-            float y = event.getY();
-            if(y > this.screenHeight / 2 && this.player.getY() < this.screenHeight - 250) newPlayerY = (this.player.getY() + 300);
-            if(y < this.screenHeight / 2 && this.player.getY() > this.screenHeight - 1150) newPlayerY = (this.player.getY() - 300);
-        }
-        else if (userAction == MotionEvent.ACTION_UP)
-        {
-
+            if(gameIsRunning)
+            {
+                float y = event.getY();
+                if(y > this.screenHeight / 2 && this.player.getY() < this.screenHeight - 250) newPlayerY = (this.player.getY() + 300);
+                if(y < this.screenHeight / 2 && this.player.getY() > this.screenHeight - 1150) newPlayerY = (this.player.getY() - 300);
+            }
+            else
+            {
+                this.restartGame();
+            }
         }
 
         return true;
