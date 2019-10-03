@@ -32,6 +32,8 @@ public class GameEngine extends SurfaceView implements Runnable
     // ------------------------------------------------
     // GAME SPECIFIC VARIABLES
     // ------------------------------------------------
+    int hp;
+    int score;
 
     // ------------------------------------------------
     // ## SPRITES
@@ -58,7 +60,8 @@ public class GameEngine extends SurfaceView implements Runnable
         this.player = new Sprite(context, this.screenWidth - 50, this.screenHeight / 2, R.drawable.dino64);
 
         // @TODO: Any other game setup
-
+        this.hp = 5;
+        this.score = 0;
     }
 
     private void printScreenInfo() { Log.d(TAG, "Screen (w, h) = " + this.screenWidth + "," + this.screenHeight); }
@@ -126,7 +129,8 @@ public class GameEngine extends SurfaceView implements Runnable
             //@TODO: Draw game stats
             this.paintbrush.setTextSize(80);
             this.paintbrush.setColor(Color.BLUE);
-            this.canvas.drawText("This is just a game template", 50, 500, this.paintbrush);
+            this.canvas.drawText("LIVES: " + this.hp, this.screenWidth / 2, 100, this.paintbrush);
+            this.canvas.drawText("SCORE: " + this.score, this.screenWidth - 400, 100, this.paintbrush);
 
             // ------------------------------------------------
             this.holder.unlockCanvasAndPost(canvas);
