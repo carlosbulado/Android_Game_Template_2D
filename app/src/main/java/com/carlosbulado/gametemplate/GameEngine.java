@@ -149,10 +149,33 @@ public class GameEngine extends SurfaceView implements Runnable
             enemy.setSpeed(r.nextInt(100) + 30);
             this.enemies.add(enemy);
         }
+        List<Item> toBeRemoved = new ArrayList<>();
+        for (Item enemy : this.enemies)
+        {
+            if((enemy.getspriteDrawableImage() == candy
+                    || enemy.getspriteDrawableImage() == rainbow)
+                    && this.player.getHitBox().intersect(enemy.getHitBox()))
+            {
+                this.score++;
+                toBeRemoved.add(enemy);
+            }
+            if(enemy.getspriteDrawableImage() == poop
+                    && this.player.getHitBox().intersect(enemy.getHitBox()))
+            {
+                this.hp--;
+                toBeRemoved.add(enemy);
+            }
+            if(enemy.getHitBox().left > this.screenWidth + 100) toBeRemoved.add(enemy);
+        }
         //@TODO: Test lose conditions
-
+        if(this.hp < 0)
+        {
+            this.pauseGame();
+        }
         //@TODO: Test win conditions
 
+        // Removing all Items that need to be removed
+        this.enemies.removeAll(toBeRemoved);
     }
 
     public void redrawSprites()
@@ -188,6 +211,10 @@ public class GameEngine extends SurfaceView implements Runnable
             this.paintbrush.setColor(Color.BLUE);
             this.canvas.drawText("LIVES: " + this.hp, this.screenWidth / 2, 100, this.paintbrush);
             this.canvas.drawText("SCORE: " + this.score, this.screenWidth - 400, 100, this.paintbrush);
+
+            // --------------- DEBUG ---------------
+            // If you want to know if the enemies are being removed, uncomment this line below
+            //this.canvas.drawText("ENEMIES: " + this.enemies.size(), 100, 100, this.paintbrush);
 
             // ------------------------------------------------
             this.holder.unlockCanvasAndPost(canvas);
