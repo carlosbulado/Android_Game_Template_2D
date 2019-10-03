@@ -46,6 +46,7 @@ public class GameEngine extends SurfaceView implements Runnable
     int score;
     boolean enemyUp = true;
     int yPosEnemy = 250;
+    int newPlayerY;
 
     int poop = R.drawable.poop64;
     int rainbow = R.drawable.rainbow64;
@@ -74,7 +75,8 @@ public class GameEngine extends SurfaceView implements Runnable
         this.printScreenInfo();
 
         // @TODO: Add your sprites
-        this.player = new Player(context, this.screenWidth - 50, this.screenHeight - 850, R.drawable.dino64);
+        newPlayerY = this.screenHeight - 850;
+        this.player = new Player(context, this.screenWidth - 50, newPlayerY, R.drawable.dino64);
         this.enemies = new ArrayList<>();
 
         // @TODO: Any other game setup
@@ -125,6 +127,8 @@ public class GameEngine extends SurfaceView implements Runnable
         this.fpsEnemyCount += 1;
         this.fpsLifeCount += 1;
         // @TODO: Update position of all sprites
+        this.player.moveJustY(newPlayerY);
+
         for (Item enemy : this.enemies) enemy.moveJustX();
 
         // @TODO: Logic of the game
@@ -145,7 +149,6 @@ public class GameEngine extends SurfaceView implements Runnable
             if(enemyUp && yPosEnemy == 1150) enemyUp = false;
             if(!enemyUp && yPosEnemy == 250) enemyUp = true;
             yPosEnemy += enemyUp ? 300 : (-300);
-            enemy.setIsMoving(true);
             enemy.setSpeed(r.nextInt(100) + 30);
             this.enemies.add(enemy);
         }
@@ -243,7 +246,9 @@ public class GameEngine extends SurfaceView implements Runnable
          */
         if (userAction == MotionEvent.ACTION_DOWN)
         {
-
+            float y = event.getY();
+            if(y > this.screenHeight / 2 && this.player.getY() < this.screenHeight - 250) newPlayerY = (this.player.getY() + 300);
+            if(y < this.screenHeight / 2 && this.player.getY() > this.screenHeight - 1150) newPlayerY = (this.player.getY() - 300);
         }
         else if (userAction == MotionEvent.ACTION_UP)
         {

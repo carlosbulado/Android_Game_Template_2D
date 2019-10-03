@@ -29,7 +29,7 @@ public class Item {
         this.y = yPosition;
         this.width = w;
         this.height = h;
-        this.isMoving = false;
+        this.isMoving = true;
         this.speed = 9999;
 
         this.hitBox = new Rect(this.x, this.y,this.x + this.width,this.y + this.height);
@@ -45,7 +45,7 @@ public class Item {
         this.spriteImage = BitmapFactory.decodeResource(c.getResources(), drawable);
         this.width = this.spriteImage.getWidth();
         this.height = this.spriteImage.getHeight();
-        this.isMoving = false;
+        this.isMoving = true;
         this.speed = 9999;
 
         this.hitBox = new Rect(this.x, this.y,this.x + this.width,this.y + this.height);
@@ -83,10 +83,9 @@ public class Item {
         }
     }
 
-    public void moveJustX()
-    {
-        this.updatePosition(this.getX() + this.getSpeed(), this.getY());
-    }
+    public void moveJustX() { this.updatePosition(this.getX() + this.getSpeed(), this.getY()); }
+
+    public void moveJustY(int y) { this.updatePosition(this.getX(), y); }
 
     public void updateHitBox()
     {
