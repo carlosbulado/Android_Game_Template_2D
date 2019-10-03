@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -43,12 +44,18 @@ public class GameEngine extends SurfaceView implements Runnable
     // ------------------------------------------------
     int hp;
     int score;
+    boolean enemyUp = true;
+    int yPosEnemy = 250;
+
+    int poop = R.drawable.poop64;
+    int rainbow = R.drawable.rainbow64;
+    int candy = R.drawable.candy64;
 
     // ------------------------------------------------
     // ## SPRITES
     // ------------------------------------------------
-    Sprite player;
-    List<Sprite> enemies;
+    Player player;
+    List<Item> enemies;
 
     // ------------------------------------------------
     // ## GAME STATS
@@ -67,7 +74,7 @@ public class GameEngine extends SurfaceView implements Runnable
         this.printScreenInfo();
 
         // @TODO: Add your sprites
-        this.player = new Sprite(context, this.screenWidth - 50, this.screenHeight - 850, R.drawable.dino64);
+        this.player = new Player(context, this.screenWidth - 50, this.screenHeight - 850, R.drawable.dino64);
         this.enemies = new ArrayList<>();
 
         // @TODO: Any other game setup
@@ -118,14 +125,29 @@ public class GameEngine extends SurfaceView implements Runnable
         this.fpsEnemyCount += 1;
         this.fpsLifeCount += 1;
         // @TODO: Update position of all sprites
+        for (Item enemy : this.enemies) enemy.moveJustX();
 
         // @TODO: Logic of the game
-        int isSpawnObject = this.r.nextInt(12) + 1;
-        if(this.fpsEnemyCount == 40)
+        if(this.fpsEnemyCount == 20)
         {
             this.fpsEnemyCount = 0;
-            Sprite enemy = new Sprite(this.getContext(), 100, 100, R.drawable.poop32);
-
+            int itemNow = poop;
+            switch ((r.nextInt(4) + 1) % 3)
+            {
+                case 1:
+                    itemNow = candy;
+                    break;
+                case 2:
+                    itemNow = rainbow;
+                    break;
+            }
+            Item enemy = new Item(this.getContext(), 0, this.screenHeight - this.yPosEnemy, itemNow);
+            if(enemyUp && yPosEnemy == 1150) enemyUp = false;
+            if(!enemyUp && yPosEnemy == 250) enemyUp = true;
+            yPosEnemy += enemyUp ? 300 : (-300);
+            enemy.setIsMoving(true);
+            enemy.setSpeed(r.nextInt(100) + 30);
+            this.enemies.add(enemy);
         }
         //@TODO: Test lose conditions
 
@@ -158,6 +180,8 @@ public class GameEngine extends SurfaceView implements Runnable
             this.canvas.drawRect(lane2, paintbrush);
             this.canvas.drawRect(lane3, paintbrush);
             this.canvas.drawRect(lane4, paintbrush);
+
+            for (Item enemy : this.enemies) this.canvas.drawBitmap(enemy.getSpriteImage(), enemy.getX(), enemy.getY(), paintbrush);
 
             //@TODO: Draw game stats
             this.paintbrush.setTextSize(80);
