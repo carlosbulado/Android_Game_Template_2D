@@ -36,6 +36,7 @@ public class GameEngine extends SurfaceView implements Runnable
     // ------------------------------------------------
     // ## SPRITES
     // ------------------------------------------------
+    Sprite player;
 
     // ------------------------------------------------
     // ## GAME STATS
@@ -54,6 +55,7 @@ public class GameEngine extends SurfaceView implements Runnable
         this.printScreenInfo();
 
         // @TODO: Add your sprites
+        this.player = new Sprite(context, this.screenWidth - 50, this.screenHeight / 2, R.drawable.dino64);
 
         // @TODO: Any other game setup
 
@@ -119,8 +121,7 @@ public class GameEngine extends SurfaceView implements Runnable
             this.paintbrush.setColor(Color.BLACK);
 
             //@TODO: Draw sprites
-            this.paintbrush.setColor(Color.GREEN);
-            this.canvas.drawRect(100, 600, 400, 900, this.paintbrush);
+            this.canvas.drawBitmap(this.player.getSpriteImage(), this.player.getX(), this.player.getY(), paintbrush);
 
             //@TODO: Draw game stats
             this.paintbrush.setTextSize(80);
